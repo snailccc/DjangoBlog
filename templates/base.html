@@ -89,16 +89,17 @@
                 </div>
                 <div class="widget widget-archives">
                     <h3 class="widget-title">归档</h3>
+                    {% archives as date_list %}
                     <ul>
+                        {% for date in date_list %}
                         <li>
-                            <a href="#">2017 年 5 月</a>
+                            <a href="{% url 'blog:archives' date.year date.month %}">
+                                {{ date.year }} 年 {{ date.month }} 月
+                            </a>
                         </li>
-                        <li>
-                            <a href="#">2017 年 4 月</a>
-                        </li>
-                        <li>
-                            <a href="#">2017 年 3 月</a>
-                        </li>
+                        {% empty %}
+                            No passage for time moment
+                        {% endfor %}
                     </ul>
                 </div>
 
@@ -108,10 +109,10 @@
                     <ul>
                         {% for category in category_list %}
                         <li>
-                            <a href="#">{{ category.name }}<span class="post-count">(13)</span> </a>
+                            <a href="{% url 'blog:category' category.pk %}">{{ category.name }}<span class="post-count">(13)</span> </a>
                         </li>
                         {% empty %}
-                        No category for the moment
+                            No category for the moment
                         {% endfor %}
                     </ul>
                 </div>
