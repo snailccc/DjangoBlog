@@ -6,7 +6,7 @@ import markdown
 from comments.forms import CommentForm
 
 def index(request):
-    posts_list = Post.objects.all().order_by('-create_time')
+    posts_list = Post.objects.all()
     return render(request,'blog/index.html',context={
         'post_list':posts_list
     })
@@ -34,7 +34,7 @@ def archives(request, year, month):
     date_list = Post.objects.filter(
         create_time__year = year,
         create_time__month = month
-    ).order_by('-create_time')
+    )
     return render(request, 'blog/index.html',context={'date_list':date_list})
 
 def category(request, pk):
