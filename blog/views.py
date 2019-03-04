@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.views.generic import ListView, DetailView
+from django.utils.text import slugify
 
 import markdown
+from markdown.extensions.toc import TocExtension
 
-from blog.models import Post, Category
+from blog.models import Post, Category, Tag
 
 from comments.forms import CommentForm
 
@@ -77,7 +79,6 @@ class IndexView(ListView):
         return data
 
 
-
 # def index(request):
 #     posts_list = Post.objects.all()
 #     return render(request,'blog/index.html',context={
@@ -95,15 +96,24 @@ class PostDetailView(DetailView):
         return respose
 
     def get_object(self, queryset=None):
-        post = super(PostDetailView,self).get_object(queryset=None)
-        post.body = markdown.markdown(
-            post.body,
-            extension=[
-                'markdown.extension.extra',
-                'mark.extension.codehilite',
-                'markdown.extension.toc',
-            ]
-        )
+        # md = markdown.Markdown(
+        #     extension=[
+        #         'markdown.extension.extra',
+        #         'mark.extension.codehilite',
+        #         'markdown.extension.toc',
+        #     ]
+        # )
+        # post.body = md.convert(post.body)
+        # post.toc = md.to
+        # return post
+        post = super(PostDetailView, self).get_object(queryset=None)
+        md = markdown.Markdown(extensions=[
+            'markdown.extensions.extra',
+            'markdown.extensions.codehilite',
+            TocExtension(slugify=slugify),
+        ])
+        post.body = md.convert(post.body)
+        post.toc = md.toc
         return post
 
     def get_context_data(self, **kwargs):
@@ -164,4 +174,13 @@ class CategoryView(IndexView):
 #     cate = get_object_or_404(Category, pk=pk)
 #     post_list = Post.objects.filter(category=cate).order_by('-create_time')
 #     return render(request,'blog/index.html',context={'post_list':post_list})
+
+class TagView(ListView):
+    model = Post
+    template_name = 'blog/index.html'
+    context_object_name = 'post_list'
+
+    def get_queryset(self):
+        tag = get_object_or_404(Tag, pk=self.kwargs.get('pk'))
+        return super(TagView,self).get_queryset().filter(tags=tag)
 
